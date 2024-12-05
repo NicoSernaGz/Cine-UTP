@@ -1,0 +1,275 @@
+
+# Documento de Requisitos del Producto (PRD) - Sistema de Gestión de Cine
+
+## 1. Descripción General del Sistema
+El sistema es una **aplicación web full-stack** diseñada para gestionar las operaciones de un cine, permitiendo la administración de películas, usuarios, sesiones y más. Está construido sobre una arquitectura cliente-servidor utilizando las siguientes tecnologías:
+
+- **Frontend**: React.js
+- **Backend**: Node.js/Express.js
+- **Base de Datos**: MongoDB 
+- **URL: mongodb+srv://nserna:N444222666@bd2cluster.5d9jg.mongodb.net/
+
+Este sistema facilitará la gestión eficiente de películas y sesiones de cine, mejorando la experiencia tanto para los usuarios como para los administradores.
+
+## Introducción
+
+### Nombre del Proyecto: Cine UTP
+**Descripción General**: El proyecto Cine UTP consiste en una página web donde, al registrarse, los usuarios podrán acceder a un catálogo de películas. La plataforma está diseñada para mejorar la experiencia de exploración de películas, ofreciendo información detallada sobre cada título y funcionalidades adicionales para mejorar la interacción del usuario con el sistema.
+
+**Objetivo Principal**: Proveer una herramienta intuitiva y moderna que permita a los usuarios de la comunidad UTP consultar, explorar y gestionar sus intereses relacionados con películas.
+
+**Alcance**:
+- A los usuarios: Registrarse, consultar un catálogo de películas, comprar entradas, verificar la disponibilidad de asientos en tiempo real y acceder a su historial de compras.
+- A los administradores: Gestionar inventarios de películas, horarios y la disponibilidad de asientos.
+
+## 2. Diseño de la Base de Datos
+
+### 2.1 Estructura de la Base de Datos
+
+#### Colección `users`
+Almacena información de los usuarios:
+```json
+{
+  "nombre": "string",
+  "email": "string",
+  "password": "string",
+  "telefono": "string (opcional)",
+  "preferencias": {
+    "generos": ["string"],
+    "notificaciones": "boolean",
+    "idiomaPref": "string"
+  },
+  "isAdmin": "boolean",
+  "createdAt": "date"
+}
+```
+
+#### Colección `movies`
+Contiene detalles sobre las películas:
+```json
+{
+  "titulo": "string",
+  "sinopsis": "string",
+  "generos": ["string"],
+  "duracion": "number",
+  "clasificacion": "string",
+  "director": "string",
+  "actores": ["string"],
+  "imagen": "string (URL)",
+  "fechaEstreno": "date",
+  "estado": "string"
+}
+```
+
+#### Colección `sessions`
+Para administrar horarios y disponibilidad de películas:
+```json
+{
+  "movieId": "ObjectId",
+  "cine": "string",
+  "sala": "string",
+  "fecha": "date",
+  "hora": "string",
+  "asientosDisponibles": "number"
+}
+```
+
+## 3. Funcionalidades Detalladas
+
+### 3.1 Autenticación de Usuarios
+
+- **Registro de Usuario**: Permite a nuevos usuarios registrarse.  
+  Endpoint: `POST /api/auth/register`  
+  Datos requeridos: nombre, email, password, teléfono.  
+  Respuesta: Token JWT con información del usuario.
+
+```json
+{
+  "nombre": "string",
+  "email": "string",
+  "password": "string",
+  "telefono": "string (opcional)"
+}
+```
+
+- **Inicio de Sesión**: Autentica usuarios existentes.  
+  Endpoint: `POST /api/auth/login`  
+  Datos requeridos: email, password.  
+  Respuesta: Token JWT.
+
+```json
+{
+  "email": "string",
+  "password": "string"
+}
+```
+
+### 3.2 Gestión de Usuarios
+
+- **Obtener Perfil de Usuario**: Retorna información del usuario actual.  
+  Endpoint: `GET /api/users/profile`  
+  Autenticación: JWT requerida.  
+
+- **Actualizar Perfil**: Permite actualizar nombre, teléfono o preferencias del usuario.  
+  Endpoint: `PUT /api/users/profile`  
+
+```json
+{
+  "nombre": "string",
+  "telefono": "string",
+  "preferencias": {
+    "generos": ["string"],
+    "notificaciones": boolean,
+    "idiomaPref": "string"
+  }
+}
+```
+
+### 3.3 Gestión de Películas
+
+- **Listar Películas**: Obtiene todas las películas en el sistema con filtros opcionales.  
+  Endpoint: `GET /api/movies`  
+
+- **Agregar Película** (Admin): Permite agregar una nueva película.  
+  Endpoint: `POST /api/movies`  
+  Autenticación: Admin requerida.  
+
+```json
+{
+  "titulo": "string",
+  "sinopsis": "string",
+  "generos": ["string"],
+  "duracion": "number",
+  "clasificacion": "string",
+  "director": "string",
+  "actores": ["string"],
+  "imagen": "string (URL)",
+  "fechaEstreno": "date",
+  "estado": "string"
+}
+```
+
+- **Actualizar Película** (Admin): Actualiza detalles de una película existente.  
+  Endpoint: `PUT /api/movies/:id`  
+
+- **Eliminar Película** (Admin): Elimina una película del sistema.  
+  Endpoint: `DELETE /api/movies/:id`  
+
+### 3.4 Gestión de Sesiones
+
+- **Agregar Sesión**: Permite programar una nueva sesión para una película.  
+  Endpoint: `POST /api/sessions`  
+  Datos requeridos: movieId, cine, sala, fecha, hora, asientosDisponibles.  
+
+```json
+{
+  "movieId": "ObjectId",
+  "cine": "string",
+  "sala": "string",
+  "fecha": "date",
+  "hora": "string",
+  "asientosDisponibles": "number"
+}
+```
+
+- **Listar Sesiones**: Muestra todas las sesiones programadas.  
+  Endpoint: `GET /api/sessions`  
+
+### 3.5 Seguridad
+
+- **Middleware de Autenticación**:  
+  Asegura que las rutas protegidas solo sean accesibles por usuarios autenticados.  
+
+```javascript
+const auth = (req, res, next) => {
+  const token = req.header('x-auth-token');
+  if (!token) {
+    return res.status(401).json({ msg: 'No hay token' });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded.user;
+    next();
+  } catch (err) {
+    res.status(401).json({ msg: 'Token no válido' });
+  }
+};
+```
+
+- **Middleware de Admin**:  
+  Restringe ciertas acciones a usuarios con privilegios administrativos.
+
+```javascript
+const admin = (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).json({ 
+      msg: 'Acceso denegado - Se requieren permisos de administrador' 
+    });
+  }
+  next();
+};
+```
+
+## 4. Manejo de Errores
+
+### 4.1 Middleware Global de Errores
+
+```javascript
+app.use((err, req, res, next) => {
+  console.error('Error global:', err);
+  res.status(500).json({ 
+    msg: 'Error del servidor', 
+    error: err.message 
+  });
+});
+```
+
+## 5. Variables de Entorno
+```bash
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/cine
+JWT_SECRET=your_jwt_secret
+NODE_ENV=development
+```
+
+## 6. Consideraciones de Seguridad
+
+### 6.1 Protección de Contraseñas
+- Uso de bcrypt para hash de contraseñas
+- Salt rounds configurables
+- Nunca se almacenan contraseñas en texto plano
+
+### 6.2 Protección de Rutas
+- Middleware de autenticación para rutas protegidas
+- Verificación de roles para acciones administrativas
+- Validación de tokens JWT
+
+## 7. Escalabilidad y Mantenimiento
+
+### 7.1 Estructura Modular
+- Separación clara de responsabilidades
+- Modelos independientes
+- Controladores específicos por funcionalidad
+
+### 7.2 Logging y Monitoreo
+- Registro detallado de errores
+- Monitoreo de conexiones a la base de datos
+- Tracking de acciones administrativas
+
+## 8. Pruebas
+
+### 8.1 Archivo de Prueba de Conexión
+
+```javascript
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+    console.log('✅ Conexión exitosa a MongoDB');
+    console.log(`Host: ${conn.connection.host}`);
+  } catch (error) {
+    console.error('❌ Error de conexión:', error);
+    process.exit(1);
+  }
+};
+```
+
