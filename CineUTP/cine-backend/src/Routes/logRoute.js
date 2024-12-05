@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { register, login } = require('../Controllers/logController');
-const User = require('../Models/user'); // Añade esta línea
+const User = require('../Models/user');
 
 // Rutas de autenticación
 router.post('/register', register);
@@ -15,16 +15,6 @@ router.get('/check-users', async (req, res) => {
     res.json(users);
   } catch (error) {
     console.error('Error al buscar usuarios:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Ruta para limpiar usuarios (solo para desarrollo)
-router.delete('/clear-users', async (req, res) => {
-  try {
-    await User.deleteMany({});
-    res.json({ msg: 'Todos los usuarios eliminados' });
-  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });

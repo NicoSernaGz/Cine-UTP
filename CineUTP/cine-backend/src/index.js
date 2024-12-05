@@ -13,7 +13,7 @@ app.use(express.json());
 
 // Rutas
 app.use('/api/auth', require('./Routes/logRoute'));
-app.use('/api/users', require('./Routes/userRoute')); // Asegúrate de que esta línea esté presente
+app.use('/api/users', require('./Routes/userRoute')); 
 app.use('/api/movies', require('./Routes/movieRoute'));
 
 // Manejo de errores global

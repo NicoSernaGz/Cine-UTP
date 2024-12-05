@@ -31,7 +31,7 @@ const MovieForm = ({ movie, onSubmit, onCancel }) => {
         ...movie,
         actores: movie.actores.join(", "),
         fechaEstreno: movie.fechaEstreno.split("T")[0],
-        generos: movie.generos || [], // Asegúrate de que generos esté en el estado
+        generos: movie.generos || [], 
       });
     }
   }, [movie]);

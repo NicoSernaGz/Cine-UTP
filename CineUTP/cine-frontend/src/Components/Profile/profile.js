@@ -1,7 +1,9 @@
+// src/Components/Profile/profile.js
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../Context/logContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import UserProfileForm from './userInfo';
 import Preferences from './preferences';
 import PurchaseHistory from './history';
 
@@ -11,13 +13,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [userInfo, setUserInfo] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    nombre: '',
-    email: '',
-    telefono: ''
-  });
-  const [activeTab, setActiveTab] = useState('profile'); // Estado para manejar la pestaña activa
+  const [activeTab, setActiveTab] = useState('profile');
 
   const fetchUserInfo = async () => {
     try {
@@ -34,11 +30,6 @@ const Profile = () => {
       });
 
       setUserInfo(response.data);
-      setFormData({
-        nombre: response.data.nombre,
-        email: response.data.email,
-        telefono: response.data.telefono || ''
-      });
       setError('');
     } catch (err) {
       console.error('Error al obtener perfil:', err);
@@ -54,128 +45,6 @@ const Profile = () => {
   useEffect(() => {
     fetchUserInfo();
   }, [navigate]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.put(
-        'http://localhost:5000/api/users/profile',
-        formData,
-        {
-          headers: {
-            'x-auth-token': token,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      setUserInfo(response.data);
-      setIsEditing(false);
-      setError('');
-    } catch (err) {
-      console.error('Error al actualizar perfil:', err);
-      setError('Error al actualizar el perfil');
-    }
-  };
-
-  const renderProfileContent = () => {
-    if (activeTab === 'profile') {
-      if (isEditing) {
-        return (
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label className="form-label">Nombre</label>
-              <input
-                type="text"
-                className="form-control"
-                name="nombre"
-                value={formData.nombre}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Teléfono</label>
-              <input
-                type="tel"
-                className="form-control"
-                name="telefono"
-                value={formData.telefono}
-                onChange={handleInputChange}
-                placeholder={formData.telefono ? '' : 'No se tiene ningún número telefónico registrado'}
-              />
-            </div>
-            <div className="d-flex gap-2">
-              <button type="submit" className="btn btn-success">
-                Guardar Cambios
-              </button>
-              <button 
-                type="button" 
-                className="btn btn-secondary"
-                onClick={() => {
-                  setIsEditing(false);
-                  setFormData({
-                    nombre: userInfo.nombre,
-                    email: userInfo.email,
-                    telefono: userInfo.telefono || ''
-                  });
-                }}
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
-        );
-      }
-
-      return (
-        <div className="row mt-4">
-          <div className="col-md-6">
-            <p><strong>Nombre:</strong> {userInfo.nombre}</p>
-            <p><strong>Email:</strong> {userInfo.email}</p>
-            <p><strong>Teléfono:</strong> {userInfo.telefono || 'No registrado'}</p>
-            <button 
-              className="btn btn-primary"
-              onClick={() => setIsEditing(true)}
-            >
-              Editar Perfil
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    // Renderizar contenido de preferencias o historial de compras
-    if (activeTab === 'preferences' && userInfo) {
-      return <Preferences userData={userInfo} onUpdate={fetchUserInfo} />;
-    }
-
-    if (activeTab === 'history') {
-      return <PurchaseHistory />;
-    }
-
-    return null; // En caso de que no haya contenido que mostrar
-  };
 
   if (loading) {
     return (
@@ -229,7 +98,11 @@ const Profile = () => {
           </ul>
         </div>
         <div className="card-body">
-          {renderProfileContent()}
+          {activeTab === 'profile' && userInfo && (
+            <UserProfileForm userData={userInfo} onUpdate={fetchUserInfo} />
+          )}
+          {activeTab === 'preferences' && userInfo && <Preferences userData={userInfo} onUpdate={fetchUserInfo} />}
+          {activeTab === 'history' && <PurchaseHistory />}
         </div>
       </div>
     </div>

@@ -11,9 +11,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 // Componente para la barra de navegación
 const Navbar = () => {
   const { isAuthenticated, logout, user } = useAuth();
-  console.log('Navbar - Estado de autenticación:', isAuthenticated); // Debug
-  console.log('Navbar - Usuario:', user); // Debug
-  console.log('Navbar - Es admin:', user?.isAdmin); // Debug
+  console.log('Navbar - Estado de autenticación:', isAuthenticated); 
+  console.log('Navbar - Usuario:', user);
+  console.log('Navbar - Es admin:', user?.isAdmin);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -49,7 +49,7 @@ const Navbar = () => {
                 <button 
                   className="btn btn-outline-light ms-2" 
                   onClick={() => {
-                    console.log('Cerrando sesión...'); // Debug
+                    console.log('Cerrando sesión...'); 
                     logout();
                   }}
                 >
@@ -73,14 +73,14 @@ const Navbar = () => {
   );
 };
 
-// Componente mejorado para rutas protegidas de administrador
+// Componente que se le aplica una mejora para rutas protegidas de administrador
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
   
-  console.log('AdminRoute - Verificando permisos...'); // Debug
-  console.log('AdminRoute - Usuario autenticado:', isAuthenticated); // Debug
-  console.log('AdminRoute - Información de usuario:', user); // Debug
-  console.log('AdminRoute - Es admin:', user?.isAdmin); // Debug
+  console.log('AdminRoute - Verificando permisos...');
+  console.log('AdminRoute - Usuario autenticado:', isAuthenticated); 
+  console.log('AdminRoute - Información de usuario:', user);
+  console.log('AdminRoute - Es admin:', user?.isAdmin); 
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -93,10 +93,9 @@ const AdminRoute = ({ children }) => {
       return;
     }
     
-    console.log('AdminRoute - Acceso permitido'); // Debug
+    console.log('AdminRoute - Acceso permitido');
   }, [isAuthenticated, user]);
 
-  // Si está cargando, esperar
   if (isLoading) {
     return <div>Cargando...</div>;
   }
@@ -168,7 +167,7 @@ function App() {
             } 
           />
 
-          {/* Ruta por defecto */}
+          {/* Ruta por defecto o generales */}
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </Router>

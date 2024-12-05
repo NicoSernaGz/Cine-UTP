@@ -6,7 +6,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Agregamos estado de carga
+  const [isLoading, setIsLoading] = useState(true);
 
   // Verificar autenticación al cargar/recargar la página
   useEffect(() => {
@@ -55,9 +55,9 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(false);
   };
 
-  // Si está cargando, mostramos un loading o null
+
   if (isLoading) {
-    return <div>Cargando...</div>; // O puedes retornar null
+    return <div>Cargando...</div>;
   }
 
   const value = {
